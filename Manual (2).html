@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CREA-BOT - Cyberpunk 2024 (Versão Final)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00f6ff;
+            --secondary-color: #ff00c1;
+            --accent-color: #f7ff00;
+            --background-start: #01011a;
+            --background-end: #101035;
+            --text-color: #e0e0e0;
+            --glow-primary: rgba(0, 246, 255, 0.7);
+            --border-color: rgba(0, 246, 255, 0.3);
+            --container-bg: rgba(16, 16, 53, 0.5);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--background-start);
+            background-image: 
+                linear-gradient(rgba(0, 246, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 246, 255, 0.05) 1px, transparent 1px);
+            background-size: 2rem 2rem;
+            color: var(--text-color);
+            font-family: 'Exo 2', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: background-pan 20s linear infinite;
+        }
+
+        @keyframes background-pan {
+            0% { background-position: 0 0; }
+            100% { background-position: 2rem 2rem; }
+        }
+
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        
+        .text-glow { 
+            text-shadow: 0 0 8px var(--glow-primary), 0 0 16px var(--glow-primary), 0 0 24px var(--secondary-color);
+            animation: glitch 3s linear infinite;
+        }
+
+        @keyframes glitch{
+          2%,64%{ transform: translate(2px,0) skew(0deg); }
+          4%,60%{ transform: translate(-2px,0) skew(0deg); }
+          62%{ transform: translate(0,0) skew(5deg); }
+        }
+
+        .border-glow {
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 12px var(--border-color);
+        }
+        
+        .nav-item {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border-left: 4px solid transparent;
+            clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(0, 246, 255, 0.1);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateX(5px) scale(1.02);
+        }
+        .nav-item .emoji { 
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: inline-block;
+        }
+        .nav-item:hover .emoji, .nav-item.active .emoji {
+            transform: rotate(15deg) scale(1.3);
+        }
+
+        .content-section { display: none; }
+        @keyframes panel-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .content-section.active {
+            display: block;
+            animation: panel-fade-in 0.5s ease-out forwards;
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--background-start); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(var(--primary-color), var(--secondary-color)); border-radius: 5px; }
+        
+        .dossier-card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+        }
+        .dossier-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px var(--glow-primary);
+            border-color: var(--primary-color);
+        }
+        .dossier-emoji {
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px var(--glow-primary);
+        }
+        .dossier-codename {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-color);
+        }
+        .dossier-file {
+            font-family: 'Roboto Mono', monospace;
+            color: var(--accent-color);
+            background-color: rgba(0,0,0,0.3);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8.4px;
+            cursor: pointer;
+            background: var(--primary-color);
+            border-radius: 1.3px;
+            border: 0.2px solid #010101;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            box-shadow: 0px 0px 5px var(--secondary-color), 0px 0px 10px var(--secondary-color);
+            border: 1px solid var(--primary-color);
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -9px;
+        }
+
+        /* --- Cover Screen & App Container Logic --- */
+        #cover-screen {
+            transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+        }
+        #cover-screen.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+        #main-app-container {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.7s ease-in 0.3s, transform 0.7s ease-in 0.3s;
+        }
+        #main-app-container.hidden {
+            opacity: 0;
+            transform: scale(1.05);
+            pointer-events: none;
+        }
+        #enter-button {
+            border: 1px solid var(--primary-color);
+            padding: 0.75rem 2rem;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 8px var(--glow-primary);
+            transition: all 0.3s ease;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+            background: rgba(0, 246, 255, 0.1);
+        }
+        #enter-button:hover {
+            background: var(--primary-color);
+            color: var(--background-start);
+            box-shadow: 0 0 20px var(--glow-primary);
+            transform: scale(1.05);
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 12px var(--border-color); }
+            50% { box-shadow: 0 0 25px var(--glow-primary); }
+        }
+        .pulse-glow {
+            animation: pulse 2.5s infinite;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Cover Screen (Capa) -->
+    <div id="cover-screen" class="fixed inset-0 bg-[var(--background-start)] flex items-center justify-center z-50 p-4">
+        <div class="text-center">
+            <div class="border-glow p-8 rounded-xl backdrop-blur-sm pulse-glow" style="transform: translateZ(0);">
+                <h1 class="text-5xl sm:text-7xl lg:text-8xl font-orbitron font-black uppercase text-glow text-white">
+                    CREA-BOT
+                </h1>
+                <p class="text-lg md:text-2xl text-primary-color mt-4 font-medium tracking-widest">SYSTEM ONLINE</p>
+                <button id="enter-button" class="mt-12 text-xl text-primary-color font-bold">
+                    [ INICIAR SESSÃO ]
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div id="main-app-container" class="w-full max-w-screen-2xl mx-auto">
+        <div class="relative bg-[var(--container-bg)] border-glow rounded-xl backdrop-blur-md p-4 sm:p-6 lg:p-8 flex flex-col md:max-h-[95vh]" style="transform: translateZ(0);">
+            
+            <!-- Close Button (X) -->
+            <button id="close-button" class="absolute top-4 right-4 sm:top-6 sm:right-6 text-secondary-color hover:text-accent-color transition-all duration-300 p-2 z-30 rounded-full hover:bg-secondary-color/20 hover:rotate-90" title="Voltar à Capa">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <header class="text-center mb-8 md:mb-12 flex-shrink-0">
+                <h1 class="text-4xl sm:text-5xl lg:text-7xl font-orbitron font-black uppercase text-glow text-white">
+                    CREA-BOT
+                </h1>
+                <p class="text-lg md:text-xl text-primary-color mt-2 font-medium">Manual de Operações Definitivo</p>
+            </header>
+            
+            <div class="md:hidden flex justify-between items-center mb-4 flex-shrink-0">
+                <h2 class="font-orbitron text-xl text-primary-color">Menu de Seções</h2>
+                <button id="hamburger-btn" class="p-2 rounded-md border-glow text-primary-color z-20">
+                    <svg id="hamburger-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    <svg id="hamburger-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-8 flex-grow md:min-h-0">
+                <nav id="nav-menu" class="w-full md:w-1/3 lg:w-1/4 h-full hidden md:block">
+                    <div class="bg-black/20 rounded-lg p-4 h-full overflow-y-auto">
+                        <ul class="space-y-1 text-lg">
+                            <li class="nav-item active p-3" data-target="vantagem-decisiva"><span class="emoji mr-3">🚀</span>A Vantagem Decisiva</li>
+                            <li class="nav-item p-3" data-target="inteligencia-combate"><span class="emoji mr-3">🧠</span>Inteligência de Combate</li>
+                            <li class="nav-item p-3" data-target="manual-campo"><span class="emoji mr-3">🕹️</span>Manual de Campo</li>
+                            <li class="nav-item p-3" data-target="protocolos-seguranca"><span class="emoji mr-3">🛡️</span>Protocolos de Segurança</li>
+                            <li class="nav-item p-3" data-target="troubleshooting"><span class="emoji mr-3">🛠️</span>Intel de Campo</li>
+                            <li class="nav-item p-3" data-target="planta-baixa"><span class="emoji mr-3">🏗️</span>A Planta Baixa</li>
+                            <li class="nav-item p-3" data-target="desempenho"><span class="emoji mr-3">⚡</span>Análise de Performance</li>
+                            <li class="nav-item p-3" data-target="evolucao-suporte"><span class="emoji mr-3">🔮</span>Evolução e Suporte</li>
+                        </ul>
+                    </div>
+                </nav>
+
+                <main id="main-content" class="w-full md:w-2/3 lg:w-3/4 md:h-full">
+                    <div class="bg-black/20 rounded-lg p-6 lg:p-8 h-full overflow-y-auto">
+                        <div id="vantagem-decisiva" class="content-section">
+                            <h2 class="text-3xl lg:text-4xl font-orbitron font-bold text-primary-color mb-4">A Vantagem Decisiva</h2>
+                            <h3 class="text-xl font-orbitron text-secondary-color mt-6 mb-2">O Campo de Batalha: A Realidade do Processo Manual</h3>
+                            <p class="mb-4 text-lg leading-relaxed">Vamos ser diretos. O processo manual é uma trincheira. É o "copia e cola" incessante, a tensão a cada "salvar", o medo constante de um erro de digitação que pode comprometer horas de trabalho. É um campo de batalha onde seus inimigos são o relógio, o cansaço e a monotonia. E nessa guerra, você sempre perde.</p>
+                            <h3 class="text-xl font-orbitron text-primary-color mt-8 mb-2">O Arsenal: A Chegada do CREA-BOT</h3>
+                            <p class="mb-4 text-lg leading-relaxed">O CREA-BOT não é uma nova tática. É uma nova arma. Ele entra no campo de batalha com um arsenal projetado para aniquilar a ineficiência:</p>
+                            <ul class="list-none space-y-3 text-lg">
+                                <li class="flex items-start"><span class="text-primary-color mr-3 text-2xl">►</span><div><strong class="text-white">Eficiência Implacável:</strong> Ele não cansa. Não para para o café. Ele executa a missão com uma velocidade constante e sobre-humana, transformando dias de trabalho em horas.</div></li>
+                                <li class="flex items-start"><span class="text-primary-color mr-3 text-2xl">►</span><div><strong class="text-white">Precisão Cirúrgica:</strong> A chance de erro humano é de 100%. A do BOT é de 0%. Cada dado é lançado com a precisão de um laser, garantindo integridade total.</div></li>
+                                <li class="flex items-start"><span class="text-primary-color mr-3 text-2xl">►</span><div><strong class="text-white">Resiliência Absoluta:</strong> Se a conexão cai ou um imprevisto acontece, ele não entra em pânico. Ele pausa, preserva o progresso e aguarda ordens para retomar a missão.</div></li>
+                            </ul>
+                            <h3 class="text-xl font-orbitron text-accent-color mt-8 mb-2">O Veredito: O Fim do Trabalho Manual</h3>
+                            <p class="text-lg leading-relaxed">A conclusão é simples. Diante deste arsenal, continuar com o processo manual não é mais uma opção. É uma desvantagem estratégica. O CREA-BOT não veio para "ajudar". Ele veio para <strong class="text-white">encerrar a guerra contra a ineficiência</strong> e liberar o seu verdadeiro potencial: o capital humano.</p>
+                        </div>
+
+                        <div id="inteligencia-combate" class="content-section active">
+                            <h2 class="text-3xl lg:text-4xl font-orbitron font-bold text-primary-color mb-4">Anatomia de um Operador de Elite</h2>
+                            <p class="mb-8 text-lg leading-relaxed">O BOT não opera com um cronômetro cego. Ele escuta o campo de batalha digital e reage em tempo real. Sua inteligência adaptativa é forjada em 7 protocolos de combate ativos e comprovados em campo.</p>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div class="dossier-card p-4"><p class="dossier-emoji">📡</p><h4 class="text-xl dossier-codename">Sincronização por Eventos</h4><p class="text-base leading-relaxed mt-2">Abandona "sleeps" cegos. Usa `WebDriverWait` para só avançar quando o site confirma "pronto". O ritmo se ajusta à latência real do sistema inimigo. <strong class="text-primary-color block mt-1">Status: ATIVO</strong></p></div>
+                                <div class="dossier-card p-4"><p class="dossier-emoji">🦾</p><h4 class="text-xl dossier-codename">Clique Resiliente</h4><p class="text-base leading-relaxed mt-2">Antes de clicar, verifica se o alvo está "clicável". Se o ataque primário falha, aciona um fallback tático (`execute_script`) para garantir a execução. <strong class="text-primary-color block mt-1">Status: ATIVO</strong></p></div>
+                                <div class="dossier-card p-4"><p class="dossier-emoji">🔄</p><h4 class="text-xl dossier-codename">Retry Controlado</h4><p class="text-base leading-relaxed mt-2">Trata alvos que "envelhecem" (`StaleElement...`) re-localizando o elemento. Reduz fogo inútil enquanto o DOM se atualiza. <strong class="text-primary-color block mt-1">Status: ATIVO</strong></p></div>
+                                <div class="dossier-card p-4"><p class="dossier-emoji">📋</p><h4 class="text-xl dossier-codename">Validação Pré-Execução</h4><p class="text-base leading-relaxed mt-2">O validador inspeciona a planilha (datas, CPF/CNPJ) antes de enviar os dados. Menos erros no campo resultam em um ritmo de avanço mais estável. <strong class="text-primary-color block mt-1">Status: ATIVO</strong></p></div>
+                                <div class="dossier-card p-4"><p class="dossier-emoji">🔋</p><h4 class="text-xl dossier-codename">Pausa Operacional (ART)</h4><p class="text-base leading-relaxed mt-2">Ao atingir o 100º contrato, o fluxo pausa para a troca de ART. Impõe um throttle tático na operação, evitando erros por exceder limites. <strong class="text-primary-color block mt-1">Status: ATIVO</strong></p></div>
+                                <div class="dossier-card p-4"><p class="dossier-emoji">🛑</p><h4 class="text-xl dossier-codename">Parada Segura</h4><p class="text-base leading-relaxed mt-2">O comando de parada não corta a energia. Ele ordena a finalização segura do ciclo atual, prevenindo corrupção de estado e garantindo uma retirada limpa. <strong class="text-primary-color block mt-1">Status: ATIVO</strong></p></div>
+                            </div>
+                            <div class="dossier-card p-5 rounded-lg mt-6 border-2 border-accent-color/50">
+                                <h4 class="text-2xl font-orbitron text-accent-color mb-3">⚡ Resumo Tático ⚡</h4>
+                                <p class="text-lg leading-relaxed">“O CREA-BOT opera em ritmo adaptativo porque escuta o site: ele só avança quando o DOM confirma que está pronto, ajusta o tempo naturalmente via WebDriverWait e retries inteligentes, usa clique resiliente para não forçar ações em UI lenta, e aplica pausas de negócio (limite da ART) e parada segura. <strong class="text-white">Não depende de sleep fixo.</strong>”</p>
+                            </div>
+                        </div>
+                        
+                        <div id="manual-campo" class="content-section">
+                            <h2 class="text-3xl lg:text-4xl font-orbitron font-bold text-primary-color mb-4">Manual de Campo</h2>
+                            <h3 class="text-xl font-orbitron text-secondary-color mt-6 mb-4">Briefing da Missão (Passo a Passo)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">1️⃣</p><h4 class="text-xl dossier-codename">Prepare a Munição</h4><p class="text-base leading-relaxed mt-2">Certifique-se de que sua planilha Excel (.xlsx ou .xlsm) esteja atualizada e com os dados corretos.</p></div>
+                                <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">2️⃣</p><h4 class="text-xl dossier-codename">Inicie o Sistema</h4><p class="text-base leading-relaxed mt-2">Execute o arquivo `CREA-BOT.exe` para abrir o painel de comando.</p></div>
+                                <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">3️⃣</p><h4 class="text-xl dossier-codename">Carregue o Mapa</h4><p class="text-base leading-relaxed mt-2">O BOT lembrará da última planilha. Se for uma nova missão, selecione o arquivo correto.</p></div>
+                                <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">4️⃣</p><h4 class="text-xl dossier-codename">Defina o Ponto de Partida</h4><p class="text-base leading-relaxed mt-2">Informe o número do contrato a partir do qual a automação deve começar. O BOT sugerirá o próximo, baseado na última missão.</p></div>
+                                <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">5️⃣</p><h4 class="text-xl dossier-codename">Execute a Missão</h4><p class="text-base leading-relaxed mt-2">Clique no botão "Iniciar" e monitore o progresso no painel de logs.</p></div>
+                                <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">6️⃣</p><h4 class="text-xl dossier-codename">Intervenha Sob Comando</h4><p class="text-base leading-relaxed mt-2">O BOT te avisará com caixas de diálogo claras se precisar de uma nova ART ou de um cadastro manual.</p></div>
+                            </div>
+                            <h3 class="text-xl font-orbitron text-secondary-color mt-8 mb-4">Gerenciamento do Mapa de Dados (A Planilha)</h3>
+                            <div class="dossier-card p-5 rounded-lg border-2 border-accent-color/50">
+                                <h4 class="text-2xl font-orbitron text-accent-color mb-3">⚠️ ALERTA TÁTICO ⚠️</h4>
+                                <p class="text-lg leading-relaxed">Se você <strong class="text-white">alterar o caminho ou o nome da planilha</strong>, não precisa reiniciar o BOT. Apenas <strong class="text-white">carregue o novo arquivo na interface</strong> para que ele recalcule a rota com os dados mais recentes.</p>
+                            </div>
+                        </div>
+
+                        <div id="protocolos-seguranca" class="content-section">
+                            <h2 class="text-3xl lg:text-4xl font-orbitron font-bold text-primary-color mb-4">Protocolos de Segurança</h2>
+                            <p class="mb-6 text-lg leading-relaxed">A robustez de uma operação está em seus protocolos de segurança e contingência. O CREA-BOT foi forjado para sobreviver e se adaptar no campo de batalha digital.</p>
+                            <div class="space-y-6">
+                                <div class="dossier-card p-5 rounded-lg">
+                                    <h3 class="text-2xl font-orbitron text-secondary-color mb-3"><span class="emoji mr-2">🛑</span> Ejeção Segura</h3>
+                                    <p class="mb-2"><strong class="text-white">A Ameaça:</strong> Interromper uma automação no meio pode corromper dados.</p>
+                                    <p class="mb-2"><strong class="text-white">A Solução Tática:</strong> O botão 'Parar' não é um corte de energia. Ele aciona uma <strong class="text-accent-color">variável de controle (`controle_parada`)</strong>. O BOT, ao verificar essa variável, finaliza a tarefa atual de forma limpa e segura antes de cessar a operação.</p>
+                                    <p><strong class="text-white">Resultado em Campo:</strong> Controle total e seguro da execução. Zero risco de corrupção de dados.</p>
+                                </div>
+                                <div class="dossier-card p-5 rounded-lg">
+                                    <h3 class="text-2xl font-orbitron text-secondary-color mb-3"><span class="emoji mr-2">🦾</span> Reflexos Aprimorados</h3>
+                                    <p class="mb-2"><strong class="text-white">A Ameaça:</strong> Elementos da página que "envelhecem" (`StaleElementReferenceException`) ou cliques que não registram.</p>
+                                    <p class="mb-2"><strong class="text-white">A Solução Tática:</strong> O BOT agora tem <strong class="text-accent-color">reflexos de combate</strong> para tratar exceções em loops e substitui cliques diretos por uma técnica de elite (`execute_script`), que é como dar uma ordem direta ao navegador.</p>
+                                    <p><strong class="text-white">Resultado em Campo:</strong> Maior estabilidade e uma taxa de sucesso de cliques drasticamente superior.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="troubleshooting" class="content-section">
+                            <h2 class="text-3xl lg:text-4xl font-orbitron font-bold text-primary-color mb-4">Intel de Campo: Solução de Problemas</h2>
+                            <p class="mb-6 text-lg leading-relaxed">Todo campo de batalha tem imprevistos. Este é o seu guia de contramedidas para as ameaças mais comuns. Mantenha a calma e siga o protocolo.</p>
+                            <div class="space-y-6">
+                                <div class="dossier-card p-5 rounded-lg">
+                                    <h3 class="text-2xl font-orbitron text-secondary-color mb-3"><span class="emoji mr-2">🎯</span> ALVO NÃO LOCALIZADO: "Contratante não encontrado"</h3>
+                                    <p class="mb-2"><strong class="text-white">Análise da Ameaça:</strong> O BOT não conseguiu encontrar o contratante no sistema do CREA. A causa mais provável é uma discrepância entre os dados da sua planilha e os dados do sistema.</p>
+                                    <p class="mb-2"><strong class="text-white">Contramedida Tática:</strong>
+                                        <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                            <li>Verifique a planilha: procure por erros de digitação, espaços extras no início ou fim do nome.</li>
+                                            <li>Confirme o nome/CPF/CNPJ exato no sistema do CREA manualmente.</li>
+                                            <li>O BOT irá pausar e solicitar que você cadastre o contratante manualmente. Siga as instruções e depois permita que o BOT continue a missão.</li>
+                                        </ul>
+                                    </p>
+                                </div>
+                                <div class="dossier-card p-5 rounded-lg">
+                                    <h3 class="text-2xl font-orbitron text-secondary-color mb-3"><span class="emoji mr-2">🔌</span> PERDA DE ENERGIA: "O BOT parou ou fechou sozinho"</h3>
+                                    <p class="mb-2"><strong class="text-white">Análise da Ameaça:</strong> A operação foi abortada de forma inesperada. Pode ser uma falha de conexão, uma atualização do sistema ou um pico de energia no servidor do CREA.</p>
+                                     <p class="mb-2"><strong class="text-white">Contramedida Tática:</strong>
+                                        <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                            <li>Não entre em pânico. O BOT salva o progresso.</li>
+                                            <li>Verifique sua conexão com a internet.</li>
+                                            <li>Reinicie o `CREA-BOT.exe`. Ele se lembrará da última planilha e sugerirá continuar do contrato onde parou.</li>
+                                            <li>Confirme o ponto de partida e reinicie a missão.</li>
+                                        </ul>
+                                    </p>
+                                </div>
+                                 <div class="dossier-card p-5 rounded-lg border-2 border-accent-color/50">
+                                    <h4 class="text-2xl font-orbitron text-accent-color mb-3">🚨 ALERTA VERMELHO: "O site do CREA mudou"</h4>
+                                    <p class="text-lg leading-relaxed"><strong class="text-white">Análise da Ameaça:</strong> O inimigo mudou a topografia do campo de batalha. O layout do site do CREA foi alterado, e os pontos de referência do BOT não são mais válidos.</p>
+                                    <p class="text-lg leading-relaxed mt-2"><strong class="text-white">Contramedida Tática:</strong> Aborte a missão imediatamente usando o botão 'Parar'. <strong class="text-white">Não tente continuar.</strong> Contate o suporte (<strong class="text-white">paulozaqueu3@gmail.com</strong>) com o máximo de detalhes. Uma atualização de software será necessária para recalibrar os sistemas de navegação do BOT.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="planta-baixa" class="content-section">
+                             <h2 class="text-3xl lg:text-4xl font-orbitron font-bold text-primary-color mb-4">A Planta Baixa: Sala de Guerra</h2>
+                             <p class="text-lg leading-relaxed mb-6">Conheça a equipe de elite por trás da operação. Cada componente tem um papel vital e um codinome de missão.</p>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                 <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">🧠</p><h4 class="text-xl dossier-codename">O Estrategista</h4><p class="dossier-file p-1 rounded-md inline-block my-2">core/processor.py</p><p class="text-base leading-relaxed">A inteligência da operação. Lê o mapa (planilha) e dita a estratégia para o Piloto.</p></div>
+                                 <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">🕹️</p><h4 class="text-xl dossier-codename">O Piloto de Elite</h4><p class="dossier-file p-1 rounded-md inline-block my-2">automation/bot.py</p><p class="text-base leading-relaxed">O soldado no campo. Controla o navegador e executa as ações com precisão militar.</p></div>
+                                 <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">🖥️</p><h4 class="text-xl dossier-codename">O Cockpit</h4><p class="dossier-file p-1 rounded-md inline-block my-2">interface/gui.py</p><p class="text-base leading-relaxed">Seu painel de comando para dar ordens e monitorar a missão em tempo real.</p></div>
+                                 <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">🔧</p><h4 class="text-xl dossier-codename">O Mecânico</h4><p class="dossier-file p-1 rounded-md inline-block my-2">utils/config_handler.py</p><p class="text-base leading-relaxed">A equipe de apoio. Salva e carrega configurações para que a máquina esteja sempre calibrada.</p></div>
+                                 <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">📋</p><h4 class="text-xl dossier-codename">O Fiscal de Qualidade</h4><p class="dossier-file p-1 rounded-md inline-block my-2">utils/validator.py</p><p class="text-base leading-relaxed">Inspeciona a 'munição' (planilha) antes da decolagem para garantir uma missão sem falhas.</p></div>
+                                 <div class="dossier-card p-4 rounded-lg"><p class="dossier-emoji">⚡</p><h4 class="text-xl dossier-codename">A Ignição</h4><p class="dossier-file p-1 rounded-md inline-block my-2">main.py</p><p class="text-base leading-relaxed">A chave que liga todo o sistema e conecta todas as partes.</p></div>
+                             </div>
+                        </div>
+                        
+                        <div id="desempenho" class="content-section">
+                            <h2 class="text-3xl lg:text-4xl font-orbitron font-bold text-primary-color mb-4">Simulador de Vantagem Tática</h2>
+                            <p class="text-lg leading-relaxed mb-6">Arraste a barra para simular um período de trabalho e veja o impacto do CREA-BOT na produtividade em tempo real. <strong class="text-white">Dados calibrados com telemetria de campo.</strong></p>
+                            
+                            <div class="mb-6">
+                                <label for="horas-trabalho" class="block text-center text-xl font-orbitron mb-2">Horas de Trabalho: <span id="horas-display" class="text-accent-color font-bold">8 horas</span></label>
+                                <input type="range" id="horas-trabalho" min="0.5" max="8" value="8" step="0.5" class="w-full">
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                                <div class="dossier-card p-5 rounded-lg">
+                                    <h3 class="text-2xl font-orbitron text-secondary-color mb-3">Operador Humano</h3>
+                                    <p id="humano-output" class="text-5xl font-orbitron text-white">264</p>
+                                    <p class="text-lg">Receitas no período</p>
+                                </div>
+                                <div class="dossier-card p-5 rounded-lg border-2 border-primary-color">
+                                    <h3 class="text-2xl font-orbitron text-primary-color mb-3">CREA-BOT</h3>
+                                    <p id="bot-output" class="text-5xl font-orbitron text-white">760</p>
+                                    <p class="text-lg">Receitas no período</p>
+                                </div>
+                            </div>
+                            <div class="dossier-card p-5 rounded-lg mt-6 border-2 border-accent-color/50">
+                                <h4 class="text-2xl font-orbitron text-accent-color mb-3">⚡ Veredito Tático ⚡</h4>
+                                <p id="veredicto" class="text-lg leading-relaxed">Em 8 horas, o BOT produz o equivalente a <strong class="text-white">quase 23 horas</strong> de um operador humano.</p>
+                            </div>
+                        </div>
+                        
+                        <div id="evolucao-suporte" class="content-section">
+                             <h2 class="text-3xl lg:text-4xl font-orbitron font-bold text-primary-color mb-4">Evolução e Suporte</h2>
+                             <p class="text-lg leading-relaxed">O futuro do CREA-BOT inclui <strong class="text-white">integração direta com sistemas ERP</strong> e modo de operação agendado. Para suporte, o canal é direto: <strong class="text-white">paulozaqueu3@gmail.com</strong>.</p>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Cover Screen & Session Logic ---
+            const coverScreen = document.getElementById('cover-screen');
+            const enterButton = document.getElementById('enter-button');
+            const closeButton = document.getElementById('close-button');
+            const mainAppContainer = document.getElementById('main-app-container');
+
+            enterButton.addEventListener('click', () => {
+                coverScreen.classList.add('hidden');
+                setTimeout(() => {
+                    coverScreen.style.display = 'none';
+                    mainAppContainer.style.display = 'block';
+                    mainAppContainer.classList.remove('hidden');
+                    setTimeout(() => { mainAppContainer.style.opacity = '1'; }, 50);
+                }, 700);
+            });
+
+            closeButton.addEventListener('click', () => {
+                mainAppContainer.classList.add('hidden');
+                mainAppContainer.style.opacity = '0';
+                setTimeout(() => {
+                    mainAppContainer.style.display = 'none';
+                    coverScreen.style.display = 'flex';
+                    setTimeout(() => { coverScreen.classList.remove('hidden'); }, 50);
+                }, 700);
+            });
+
+            // --- Responsive Navigation Logic ---
+            const navMenu = document.getElementById('nav-menu');
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const iconOpen = document.getElementById('hamburger-icon-open');
+            const iconClose = document.getElementById('hamburger-icon-close');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            hamburgerBtn.addEventListener('click', () => {
+                navMenu.classList.toggle('hidden');
+                iconOpen.classList.toggle('hidden');
+                iconClose.classList.toggle('hidden');
+            });
+
+            function switchContent(targetId) {
+                document.querySelector('.content-section.active')?.classList.remove('active');
+                document.getElementById(targetId)?.classList.add('active');
+                document.querySelector('.nav-item.active')?.classList.remove('active');
+                const targetNavItem = document.querySelector(`.nav-item[data-target="${targetId}"]`);
+                if(targetNavItem) targetNavItem.classList.add('active');
+                
+                if (window.innerWidth < 768 && !navMenu.classList.contains('hidden')) {
+                    navMenu.classList.add('hidden');
+                    iconOpen.classList.remove('hidden');
+                    iconClose.classList.add('hidden');
+                }
+            }
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => switchContent(item.getAttribute('data-target')));
+            });
+
+            // --- Performance Calculator Logic ---
+            const horasSlider = document.getElementById('horas-trabalho');
+            const horasDisplay = document.getElementById('horas-display');
+            const humanoOutput = document.getElementById('humano-output');
+            const botOutput = document.getElementById('bot-output');
+            const veredicto = document.getElementById('veredicto');
+            const botReceitasPorHora = 95;
+            const humanoReceitasPorHora = 33;
+
+            function formatHours(value) {
+                const h = Math.floor(value);
+                const m = Math.round((value - h) * 60);
+                if (value < 1) return `${m} minutos`;
+                let output = `${h} hora${h > 1 ? 's' : ''}`;
+                if (m > 10) output += ` e ${m} minutos`;
+                return output;
+            }
+
+            function updatePerformance() {
+                if (!horasSlider) return;
+                const horas = parseFloat(horasSlider.value);
+                horasDisplay.textContent = formatHours(horas);
+                const humanoTotal = Math.round(horas * humanoReceitasPorHora);
+                const botTotal = Math.round(horas * botReceitasPorHora);
+                humanoOutput.textContent = humanoTotal;
+                botOutput.textContent = botTotal;
+                if (horas > 0) {
+                    const tempoHumanoParaTrabalhoDoBot = (botTotal / humanoReceitasPorHora);
+                    veredicto.innerHTML = `Em ${formatHours(horas)}, o BOT produz o equivalente a <strong class="text-white">${formatHours(tempoHumanoParaTrabalhoDoBot)}</strong> de um operador humano.`;
+                } else {
+                    veredicto.innerHTML = 'Ajuste as horas para simular o impacto.';
+                }
+            }
+            
+            if (horasSlider) {
+                horasSlider.addEventListener('input', updatePerformance);
+                updatePerformance();
+            }
+
+            switchContent('vantagem-decisiva');
+        });
+    </script>
+</body>
+</html>
